@@ -9,6 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jock.Net.TcpJson.TestServer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jock.Net.TcpJson.TestClient", "Jock.Net.TcpJson.TestClient\Jock.Net.TcpJson.TestClient.csproj", "{AD457FA0-0C35-4824-A77B-37EE7536C87F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{603B7EE9-CEE5-48B1-B5AE-BFA5D0EC899E}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
