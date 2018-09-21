@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Jock.Net.TcpJson</name>
+    </assembly>
+    <members>
+        <member name="T:Jock.Net.TcpJson.SafeThreadObject">
+            <summary>
+            提供一个内部运行线程管理对象
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.SafeThreadObject.IsRunning">
+            <summary>
+            内部线程是否正在运行
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.SafeThreadObject.Start">
+            <summary>
+            启动服务线程
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.SafeThreadObject.OnStop">
+            <summary>
+            调用 Stoped 事件
+            </summary>
+        </member>
+        <member name="E:Jock.Net.TcpJson.SafeThreadObject.Stoped">
+            <summary>
+            当内部线程停止时发生
+            </summary>
+        </member>
+        <member name="E:Jock.Net.TcpJson.SafeThreadObject.UnhandledException">
+            <summary>
+            当内部线程发生未处理异常时发生
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.SafeThreadObject.DoRun(System.Threading.CancellationToken)">
+            <summary>
+            内部线程运行代码
+            </summary>
+            <param name="token">当用户调用 Stop 方法时触发取消通知</param>
+        </member>
+        <member name="M:Jock.Net.TcpJson.SafeThreadObject.Stop">
+            <summary>
+            通知内部线程停止运行
+            </summary>
+        </member>
+        <member name="T:Jock.Net.TcpJson.TcpJsonClient">
+            <summary>
+            Json 通讯客户端
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.#ctor(System.Net.IPEndPoint)">
+            <summary>
+            连接到指定的服务端
+            </summary>
+            <param name="remoteEP">要连接到的服务端点</param>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonClient.Client">
+            <summary>
+            关联的 <c>TcpClient</c> 对象
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonClient.PingTimeSpan">
+            <summary>
+            自动 Ping 的时间间隔
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonClient.Session">
+            <summary>
+            相关变量池
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.DoRun(System.Threading.CancellationToken)">
+            <summary>
+            内部线程运行代码
+            </summary>
+            <param name="token">当用户调用 Stop 方法时触发取消通知</param>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.SendCommand(System.String,System.Action)">
+            <summary>
+            发送一个命令
+            </summary>
+            <param name="command">命令</param>
+            <param name="callback">发送后回调</param>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.SendObject``1(``0,System.Action)">
+            <summary>
+            发送一个对象
+            </summary>
+            <typeparam name="T">对象类型</typeparam>
+            <param name="obj">对象</param>
+            <param name="callback">发送后回调</param>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.OnStop">
+            <summary>
+            触发 Stoped 事件
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.OnReceiveCommand(System.Action{System.String})">
+            <summary>
+            注册当收到命令时回调
+            </summary>
+            <param name="callback">回调方法</param>
+            <returns></returns>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.OnReceive``1(System.Action{``0,Jock.Net.TcpJson.TcpJsonClient})">
+            <summary>
+            注册当收到特定类型对象时回调
+            </summary>
+            <typeparam name="T">收到的对象类型</typeparam>
+            <param name="callback">回调方法</param>
+            <returns></returns>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.OnStoped(System.Action{Jock.Net.TcpJson.TcpJsonClient})">
+            <summary>
+            当停止时回调
+            </summary>
+            <param name="callback">回调方法</param>
+            <returns></returns>
+        </member>
+        <member name="T:Jock.Net.TcpJson.TcpJsonServer">
+            <summary>
+            Json 通讯服务端
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonServer.#ctor(System.Net.IPEndPoint)">
+            <summary>
+            创建一个 Json 通讯服务端
+            </summary>
+            <param name="listenerPoint">侦听端口</param>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonServer.WaitPendingTime">
+            <summary>
+            等待下一个连接的测试间隔（微秒）
+            </summary>
+        </member>
+        <member name="E:Jock.Net.TcpJson.TcpJsonServer.Connecting">
+            <summary>
+            当一个远程客户端连接时发生，可以设置 Cancel 属性取消连接
+            </summary>
+        </member>
+        <member name="E:Jock.Net.TcpJson.TcpJsonServer.Connected">
+            <summary>
+            当为远程客户端建立 <c>TcpJsonClient</c> 发生
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonServer.DoRun(System.Threading.CancellationToken)">
+            <summary>
+            内部线程运行代码
+            </summary>
+            <param name="token">当用户调用 Stop 方法时触发取消通知</param>
+        </member>
+        <member name="T:Jock.Net.TcpJson.ConnectingEventHandler">
+            <summary>
+            提供新客户端连接时的回调
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="T:Jock.Net.TcpJson.ConnectingEventArgs">
+            <summary>
+            新客户端连接时回调参数
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.ConnectingEventArgs.Client">
+            <summary>
+            与客户端建立连接的 <c>TcpClient</c> 对象
+            </summary>
+        </member>
+        <member name="T:Jock.Net.TcpJson.ConnectedEventHandler">
+            <summary>
+            提供客户端完成连接时回调
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="T:Jock.Net.TcpJson.ConnectedEventArgs">
+            <summary>
+            客户端完成连接时回调参数
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.ConnectedEventArgs.ServerClient">
+            <summary>
+            客户通讯端对象
+            </summary>
+        </member>
+        <member name="T:Jock.Net.TcpJson.TcpJsonServerClient">
+            <summary>
+            Json 服务端的通讯端
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonServerClient.Server">
+            <summary>
+            获取相关的服务端
+            </summary>
+        </member>
+    </members>
+</doc>

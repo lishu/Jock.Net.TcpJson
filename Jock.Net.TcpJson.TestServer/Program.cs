@@ -9,7 +9,7 @@ namespace Jock.Net.TcpJson.TestServer
 
         static void Main(string[] args)
         {
-            var server = new TcpJsonServer(new System.Net.IPEndPoint(new IPAddress(new byte[] { 10,0,0,2 }), 8013));
+            var server = new TcpJsonServer(new System.Net.IPEndPoint(IPAddress.Any, 8013));
             server.Connected += Server_Connected;
             server.Start();
         }
@@ -17,16 +17,16 @@ namespace Jock.Net.TcpJson.TestServer
         private static void Server_Connected(object sender, ConnectedEventArgs e)
         {
             e.ServerClient.Session["Id"] = $"{++SessionId}";
-            Console.WriteLine($"{e.ServerClient.Session["Id"]} 的连接已经建立");
+            Console.WriteLine($"{e.ServerClient.Session["Id"]} is connected.");
             e.ServerClient
                 .OnReceive<string>((str, client) =>
                 {
-                    Console.WriteLine($"{client.Client} 说: {str}");
+                    Console.WriteLine($"{client.Client} say: {str}");
                     client.SendObject(true);
                 })
                 .OnStoped(client =>
                 {
-                    Console.WriteLine($"{e.ServerClient.Session["Id"]} 连接已中断");
+                    Console.WriteLine($"{e.ServerClient.Session["Id"]} disconnected");
                 });
         }
     }

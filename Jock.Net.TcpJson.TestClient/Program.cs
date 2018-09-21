@@ -10,13 +10,13 @@ namespace Jock.Net.TcpJson.TestClient
             var client = new TcpJsonClient(new System.Net.IPEndPoint(new IPAddress(new byte[] { 10, 0, 0, 2 }), 8013));
             client.OnReceive<bool>((b,c) =>
             {
-                Console.WriteLine($"已回复：{b}");
+                Console.WriteLine($"Response：{b}");
             });
             client.Start();
             while (true)
             {
                 var line = Console.ReadLine();
-                client.SendObject(line, () => Console.WriteLine("已发送"));
+                client.SendObject(line, () => Console.WriteLine("Sended"));
             }
         }
     }
