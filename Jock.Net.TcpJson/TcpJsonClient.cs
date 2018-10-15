@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -21,6 +22,7 @@ namespace Jock.Net.TcpJson
         private List<Action<string>> mCommandHandlers = new List<Action<string>>();
         private List<JsonCallback> mJsonHandlers = new List<JsonCallback>();
         private List<Action<TcpJsonClient>> mStopHandlers = new List<Action<TcpJsonClient>>();
+        private List<TcpJsonNamedStream> mNamedStreams = new List<TcpJsonNamedStream>();
 
         /// <summary>
         /// 连接到指定的服务端
@@ -37,6 +39,40 @@ namespace Jock.Net.TcpJson
         {
             this.Client = tcpClient;
             this.mRemoteActiveTime = DateTime.Now;
+        }
+
+        /// <summary>
+        /// 获取一个命名流对象
+        /// </summary>
+        /// <param name="name">流名称</param>
+        /// <returns>命名流</returns>
+        public TcpJsonNamedStream GetNamedStream(string name)
+        {
+            lock (mNamedStreams)
+            {
+                var found = mNamedStreams.FirstOrDefault(s => s.Name == name);
+                if(found != null)
+                {
+                    return found;
+                }
+                mNamedStreams.Add(found = new TcpJsonNamedStream(this) { Name = name });
+                return found;
+            }
+        }
+
+        internal void FlushNamedStream(TcpJsonNamedStream tcpJsonNamedStream)
+        {
+            var buffer = tcpJsonNamedStream.GetWriteCacheAndClear();
+            if(buffer.Length > 0)
+            {
+                var package = new TcpJsonPackage
+                {
+                    Type = TcpJsonPackageType.NamedStream,
+                    DataType = tcpJsonNamedStream.Name,
+                    DataBytes = buffer
+                };
+                SendPackage(package);
+            }
         }
 
         /// <summary>
@@ -119,7 +155,15 @@ namespace Jock.Net.TcpJson
                     var package = new TcpJsonPackage();
                     package.Type = type;
                     package.DataType = reader.ReadString();
-                    package.Data = reader.ReadString();
+                    if (package.Type == TcpJsonPackageType.NamedStream)
+                    {
+                        var byteSize = reader.ReadInt32();
+                        package.DataBytes = reader.ReadBytes(byteSize);
+                    }
+                    else
+                    {
+                        package.Data = reader.ReadString();
+                    }
                     Recive(package);
                 }
                 readCache = new MemoryStream();
@@ -145,7 +189,18 @@ namespace Jock.Net.TcpJson
                 case TcpJsonPackageType.Ping:
                     DoPing();
                     break;
+                case TcpJsonPackageType.NamedStream:
+                    DoReceiveNamedStream(package);
+                    break;
+                default:
+                    break;
             }
+        }
+
+        private void DoReceiveNamedStream(TcpJsonPackage package)
+        {
+            var namedStream = GetNamedStream(package.DataType);
+            namedStream.OnDataReceive(package.DataBytes);
         }
 
         private void DoPing()

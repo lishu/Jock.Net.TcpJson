@@ -6,8 +6,9 @@ namespace Jock.Net.TcpJson
 {
     enum TcpJsonPackageType : byte
     {
-        Command,
-        Json,
-        Ping
+        Command = 0,
+        Json = 1,
+        Ping = 2,
+        NamedStream = 3,
     }
 }

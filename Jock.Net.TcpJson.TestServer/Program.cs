@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Jock.Net.TcpJson.TestServer
 {
@@ -18,6 +20,24 @@ namespace Jock.Net.TcpJson.TestServer
         {
             e.ServerClient.Session["Id"] = $"{++SessionId}";
             Console.WriteLine($"{e.ServerClient.Session["Id"]} is connected.");
+
+            #region New NamedStream Feature in Release 1.0.0.2
+            var stream = e.ServerClient.GetNamedStream("TEST");
+            var streamWorkThreadRunning = true;
+            var streamWorkThread = new Thread(() =>
+            {
+                while (streamWorkThreadRunning)
+                {
+                    if (stream.DataAvailable > 0)
+                    {
+                        Console.WriteLine($"{stream.Name} Revice Byte: {stream.ReadByte()}");
+                    }
+                }
+            });
+            streamWorkThread.IsBackground = true;
+            streamWorkThread.Start();
+            #endregion
+
             e.ServerClient
                 .OnReceive<string>((str, client) =>
                 {
@@ -26,6 +46,9 @@ namespace Jock.Net.TcpJson.TestServer
                 })
                 .OnStoped(client =>
                 {
+                    #region New NamedStream Feature in Release 1.0.0.2
+                    streamWorkThreadRunning = false;
+                    #endregion
                     Console.WriteLine($"{e.ServerClient.Session["Id"]} disconnected");
                 });
         }
