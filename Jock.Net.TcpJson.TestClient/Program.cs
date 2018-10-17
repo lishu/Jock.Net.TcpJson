@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Text;
 
 namespace Jock.Net.TcpJson.TestClient
 {
@@ -33,6 +34,10 @@ namespace Jock.Net.TcpJson.TestClient
 
                 #region New NamedStream Feature in Release 1.0.0.2
                 stream.WriteByte(1);
+                #endregion
+
+                #region New SendBytes Feature in Release 1.0.0.3
+                client.SendBytes(Encoding.UTF8.GetBytes(line));
                 #endregion
             }
         }

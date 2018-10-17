@@ -6,7 +6,7 @@ using System.Text;
 namespace Jock.Net.TcpJson
 {
     /// <summary>
-    /// 提供一个与 <c>TcpJsonClient</c> 关联的命名流，它复用现有网络流通道
+    /// Provides a named stream associated with the <c>TcpJsonClient</c> , which re-uses the existing network stream channel
     /// </summary>
     public class TcpJsonNamedStream : Stream
     {
@@ -38,47 +38,68 @@ namespace Jock.Net.TcpJson
         }
 
         /// <summary>
-        /// 流名称
+        /// Get named
         /// </summary>
         public string Name { get; internal set; }
 
         /// <summary>
-        /// 流是否可读，总是返回 true
+        /// Gets whether the stream is readable and always returns true
         /// </summary>
         public override bool CanRead => true;
 
         /// <summary>
-        /// 流是否可非顺序访问，总是返回 false
+        /// Whether the stream can be accessed in a non-sequential order and always returns false
         /// </summary>
         public override bool CanSeek => false;
 
         /// <summary>
-        /// 流是否可写，总是返回 false
+        /// Whether the stream is writable and always returns false
         /// </summary>
         public override bool CanWrite => true;
 
         /// <summary>
-        /// 是否在任何 <code>Write</code> 方法之后自动调用 <code>Flush</code>
+        /// Whether auto invoke <c>Flush()</c> after <c>Write()</c> is invoked 
         /// </summary>
         public bool AutoFlush { get; set; }
 
         /// <summary>
-        /// 获取流长度，总是触发 <c>NotSupportedException</c> 异常
+        /// Get stream length, always trigger <c>NotSupportedException</c> exception
         /// </summary>
         /// <exception cref="NotSupportedException" />
         public override long Length => throw new NotSupportedException();
 
         /// <summary>
-        /// 获取或设置流访问偏移，总是触发 <c>NotSupportedException</c> 异常
+        /// Gets or sets the stream access offset, which always triggers the <c>notsupportedexception</c> exception
         /// </summary>
         /// <exception cref="NotSupportedException" />
         public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
 
+        /// <summary>
+        /// Flush stream send all write data to remote
+        /// </summary>
         public override void Flush()
         {
             tcpJsonClient.FlushNamedStream(this);
         }
 
+        /// <summary>
+        /// Reads a block of bytes from the current stream and writes the data to a buffer.
+        /// </summary>
+        /// <param name="buffer">
+        /// When this method returns, contains the specified byte array with the values between
+        /// offset and (offset + count - 1) replaced by the characters read from the current
+        /// stream.
+        /// </param>
+        /// <param name="offset">
+        /// The zero-based byte offset in buffer at which to begin storing data from the current stream.
+        /// </param>
+        /// <param name="count">
+        /// The maximum number of bytes to read.
+        /// </param>
+        /// <returns>
+        /// The total number of bytes written into the buffer. This can be less than the
+        ///     number of bytes requested if that number of bytes are not currently available,
+        ///     or zero if the end of the stream is reached before any bytes are read.</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
             lock (readCache)
@@ -92,18 +113,30 @@ namespace Jock.Net.TcpJson
             }
         }
 
+        /// <summary>
+        /// Seek access position, Always throw <c>NotSupportedException</c>
+        /// </summary>
         [System.Diagnostics.DebuggerStepThrough]
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// Seek stream length, Always throw <c>NotSupportedException</c>
+        /// </summary>
         [System.Diagnostics.DebuggerStepThrough]
         public override void SetLength(long value)
         {
             throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// Writes a block of bytes to the current stream using data read from a buffer.
+        /// </summary>
+        /// <param name="buffer">The buffer to write data from.</param>
+        /// <param name="offset">The zero-based byte offset in buffer at which to begin copying bytes to the current stream.</param>
+        /// <param name="count">The maximum number of bytes to write.</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
             lock (writeCache)
@@ -128,7 +161,7 @@ namespace Jock.Net.TcpJson
         }
 
         /// <summary>
-        /// 获取已接受还未读取的字符数
+        /// Gets the number of characters received that have not yet been read
         /// </summary>
         public int DataAvailable
         {

@@ -41,15 +41,21 @@ namespace Jock.Net.TcpJson.TestServer
             e.ServerClient
                 .OnReceive<string>((str, client) =>
                 {
-                    Console.WriteLine($"{client.Client} say: {str}");
+                    Console.WriteLine($"Client {client.Session["Id"]} say: {str}");
                     client.SendObject(true);
                 })
+                #region New SendBytes Feature in Release 1.0.0.3
+                .OnReceiveBytes((bytes,client) =>
+                {
+                    Console.WriteLine($"Client {client.Session["Id"]} send bytes: {BitConverter.ToString(bytes)}");
+                })
+                #endregion
                 .OnStoped(client =>
                 {
                     #region New NamedStream Feature in Release 1.0.0.2
                     streamWorkThreadRunning = false;
                     #endregion
-                    Console.WriteLine($"{e.ServerClient.Session["Id"]} disconnected");
+                    Console.WriteLine($"{client.Session["Id"]} disconnected");
                 });
         }
     }

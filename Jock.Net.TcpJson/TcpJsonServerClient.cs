@@ -9,7 +9,7 @@ using System.Threading;
 namespace Jock.Net.TcpJson
 {
     /// <summary>
-    /// Json 服务端的通讯端
+    /// The communication side of the Json server
     /// </summary>
     public class TcpJsonServerClient : TcpJsonClient
     {
@@ -19,7 +19,7 @@ namespace Jock.Net.TcpJson
         }
 
         /// <summary>
-        /// 获取相关的服务端
+        /// Get the relevant service side <c>TcpJsonServer</c>
         /// </summary>
         public TcpJsonServer Server { get; }
     }

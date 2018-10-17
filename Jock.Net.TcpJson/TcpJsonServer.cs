@@ -7,7 +7,7 @@ using System.Threading;
 namespace Jock.Net.TcpJson
 {
     /// <summary>
-    /// Json 通讯服务端
+    /// Json Communication Service Side
     /// </summary>
     public class TcpJsonServer : SafeThreadObject
     {
@@ -16,33 +16,33 @@ namespace Jock.Net.TcpJson
         private WeakList<TcpJsonServerClient> mClients = new WeakList<TcpJsonServerClient>();
 
         /// <summary>
-        /// 创建一个 Json 通讯服务端
+        ///Create a Json Communication server
         /// </summary>
-        /// <param name="listenerPoint">侦听端口</param>
+        /// <param name="listenerPoint">Listening port</param>
         public TcpJsonServer(IPEndPoint listenerPoint)
         {
             mListenerPoint = listenerPoint;
         }
 
         /// <summary>
-        /// 等待下一个连接的测试间隔（微秒）
+        /// Test interval to wait for next connection (microseconds)
         /// </summary>
         public int WaitPendingTime { get; set; } = 50;
 
         /// <summary>
-        /// 当一个远程客户端连接时发生，可以设置 Cancel 属性取消连接
+        /// When a remote client connection occurs, you can set the <c>Cancel</c> property to cancel the connection
         /// </summary>
         public event ConnectingEventHandler Connecting;
 
         /// <summary>
-        /// 当为远程客户端建立 <c>TcpJsonClient</c> 发生
+        /// Triggered when a remote client connection is complete
         /// </summary>
         public event ConnectedEventHandler Connected;
 
         /// <summary>
-        /// 内部线程运行代码
+        /// Internal thread Run code
         /// </summary>
-        /// <param name="token">当用户调用 Stop 方法时触发取消通知</param>
+        /// <param name="token">Triggering a cancellation notification when the user calls the Stop method</param>
         protected override void DoRun(CancellationToken token)
         {
             mListener = new TcpListener(mListenerPoint);
@@ -92,19 +92,19 @@ namespace Jock.Net.TcpJson
     }
 
     /// <summary>
-    /// 提供新客户端连接时的回调
+    /// Callback when providing a new client connection
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
     public delegate void ConnectingEventHandler(object sender, ConnectingEventArgs e);
 
     /// <summary>
-    /// 新客户端连接时回调参数
+    /// Callback parameters when a new client connects
     /// </summary>
     public class ConnectingEventArgs : CancelEventArgs
     {
         /// <summary>
-        /// 与客户端建立连接的 <c>TcpClient</c> 对象
+        /// <c>TcpClient</c> object to which the client establishes a connection
         /// </summary>
         public TcpClient Client { get; }
 
@@ -115,19 +115,19 @@ namespace Jock.Net.TcpJson
     }
 
     /// <summary>
-    /// 提供客户端完成连接时回调
+    /// Provides callbacks when a client completes a connection
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
     public delegate void ConnectedEventHandler(object sender, ConnectedEventArgs e);
 
     /// <summary>
-    /// 客户端完成连接时回调参数
+    /// Callback parameters when the client finishes the connection
     /// </summary>
     public class ConnectedEventArgs : EventArgs
     {
         /// <summary>
-        /// 客户通讯端对象
+        /// Client Communication End Object
         /// </summary>
         public TcpJsonServerClient ServerClient { get; }
 

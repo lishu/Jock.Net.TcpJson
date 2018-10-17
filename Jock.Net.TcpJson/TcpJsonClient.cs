@@ -12,7 +12,7 @@ using System.Threading;
 namespace Jock.Net.TcpJson
 {
     /// <summary>
-    /// Json 通讯客户端
+    /// Json Communication Client
     /// </summary>
     public class TcpJsonClient : SafeThreadObject
     {
@@ -20,14 +20,15 @@ namespace Jock.Net.TcpJson
         private MemoryStream readCache = new MemoryStream();
         private DateTime mRemoteActiveTime;
         private List<Action<string>> mCommandHandlers = new List<Action<string>>();
+        private List<Action<byte[], TcpJsonClient>> mBytesHandlers = new List<Action<byte[], TcpJsonClient>>();
         private List<JsonCallback> mJsonHandlers = new List<JsonCallback>();
         private List<Action<TcpJsonClient>> mStopHandlers = new List<Action<TcpJsonClient>>();
         private List<TcpJsonNamedStream> mNamedStreams = new List<TcpJsonNamedStream>();
 
         /// <summary>
-        /// 连接到指定的服务端
+        /// Connect to the specified service side
         /// </summary>
-        /// <param name="remoteEP">要连接到的服务端点</param>
+        /// <param name="remoteEP">The service endpoint to connect to</param>
         public TcpJsonClient(IPEndPoint remoteEP)
         {
             Client = new TcpClient();
@@ -42,10 +43,10 @@ namespace Jock.Net.TcpJson
         }
 
         /// <summary>
-        /// 获取一个命名流对象
+        /// Gets a named Stream object
         /// </summary>
-        /// <param name="name">流名称</param>
-        /// <returns>命名流</returns>
+        /// <param name="name">Stream name</param>
+        /// <returns>Named stream</returns>
         public TcpJsonNamedStream GetNamedStream(string name)
         {
             lock (mNamedStreams)
@@ -76,24 +77,24 @@ namespace Jock.Net.TcpJson
         }
 
         /// <summary>
-        /// 关联的 <c>TcpClient</c> 对象
+        /// The associated <c>TcpClient</c> object
         /// </summary>
         public TcpClient Client { get; }
 
         /// <summary>
-        /// 自动 Ping 的时间间隔
+        /// Interval for automatic Ping
         /// </summary>
         public TimeSpan PingTimeSpan { get; set; } = TimeSpan.FromSeconds(5);
 
         /// <summary>
-        /// 相关变量池
+        /// Correlation variable Pool
         /// </summary>
         public NameValueCollection Session { get; } = new NameValueCollection();
 
         /// <summary>
-        /// 内部线程运行代码
+        /// Internal thread Run code
         /// </summary>
-        /// <param name="token">当用户调用 Stop 方法时触发取消通知</param>
+        /// <param name="token">Triggering a cancellation notification when the user calls the Stop method</param>
         protected override void DoRun(CancellationToken token)
         {
             using (var stream = Client.GetStream())
@@ -155,7 +156,7 @@ namespace Jock.Net.TcpJson
                     var package = new TcpJsonPackage();
                     package.Type = type;
                     package.DataType = reader.ReadString();
-                    if (package.Type == TcpJsonPackageType.NamedStream)
+                    if (package.Type == TcpJsonPackageType.NamedStream || package.Type == TcpJsonPackageType.Bytes)
                     {
                         var byteSize = reader.ReadInt32();
                         package.DataBytes = reader.ReadBytes(byteSize);
@@ -192,9 +193,17 @@ namespace Jock.Net.TcpJson
                 case TcpJsonPackageType.NamedStream:
                     DoReceiveNamedStream(package);
                     break;
+                case TcpJsonPackageType.Bytes:
+                    DoReceiveBytes(package);
+                    break;
                 default:
                     break;
             }
+        }
+
+        private void DoReceiveBytes(TcpJsonPackage package)
+        {
+            mBytesHandlers.ForEach(callback => callback(package.DataBytes, this));
         }
 
         private void DoReceiveNamedStream(TcpJsonPackage package)
@@ -248,10 +257,10 @@ namespace Jock.Net.TcpJson
         }
 
         /// <summary>
-        /// 发送一个命令
+        /// Send a command
         /// </summary>
-        /// <param name="command">命令</param>
-        /// <param name="callback">发送后回调</param>
+        /// <param name="command">Command</param>
+        /// <param name="callback">Post-Send callback</param>
         public void SendCommand(string command, Action callback = null)
         {
             SendPackage(new TcpJsonPackage
@@ -263,11 +272,11 @@ namespace Jock.Net.TcpJson
         }
 
         /// <summary>
-        /// 发送一个对象
+        /// Send an Object
         /// </summary>
-        /// <typeparam name="T">对象类型</typeparam>
-        /// <param name="obj">对象</param>
-        /// <param name="callback">发送后回调</param>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="obj">Object</param>
+        /// <param name="callback">Post-Send callback</param>
         public void SendObject<T>(T obj, Action callback = null)
         {
             SendPackage(new TcpJsonPackage
@@ -279,13 +288,35 @@ namespace Jock.Net.TcpJson
             });
         }
 
+        /// <summary>
+        /// Send a bytes block
+        /// </summary>
+        /// <param name="bytes">data to send</param>
+        /// <param name="callback">Post-Send callback</param>
+        /// <exception cref="ArgumentNullException">
+        /// <c>bytes</c> is null
+        /// </exception>
+        public void SendBytes(byte[] bytes, Action callback = null)
+        {
+            if(bytes == null)
+            {
+                throw new ArgumentNullException(nameof(bytes));
+            }
+            SendPackage(new TcpJsonPackage
+            {
+                Type = TcpJsonPackageType.Bytes,
+                DataBytes = bytes,
+                Callback = callback
+            });
+        }
+
         private string GetDataType(Type objType)
         {
             return objType.AssemblyQualifiedName;
         }
 
         /// <summary>
-        /// 触发 Stoped 事件
+        /// Triggering stoped Events
         /// </summary>
         protected override void OnStop()
         {
@@ -300,9 +331,9 @@ namespace Jock.Net.TcpJson
         }
 
         /// <summary>
-        /// 注册当收到命令时回调
+        /// Register callback when command is received
         /// </summary>
-        /// <param name="callback">回调方法</param>
+        /// <param name="callback">callback method</param>
         /// <returns></returns>
         public TcpJsonClient OnReceiveCommand(Action<string> callback)
         {
@@ -314,10 +345,10 @@ namespace Jock.Net.TcpJson
         }
 
         /// <summary>
-        /// 注册当收到特定类型对象时回调
+        /// Register callback when a specific type of object is received
         /// </summary>
-        /// <typeparam name="T">收到的对象类型</typeparam>
-        /// <param name="callback">回调方法</param>
+        /// <typeparam name="T">Type of object received</typeparam>
+        /// <param name="callback">callback method</param>
         /// <returns></returns>
         public TcpJsonClient OnReceive<T>(Action<T, TcpJsonClient> callback)
         {
@@ -329,9 +360,23 @@ namespace Jock.Net.TcpJson
         }
 
         /// <summary>
-        /// 当停止时回调
+        /// Register callback when a bytes block is received
         /// </summary>
-        /// <param name="callback">回调方法</param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        public TcpJsonClient OnReceiveBytes(Action<byte[], TcpJsonClient> callback)
+        {
+            lock(mBytesHandlers)
+            {
+                mBytesHandlers.Add(callback);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Callback when stopped
+        /// </summary>
+        /// <param name="callback">callback method</param>
         /// <returns></returns>
         public TcpJsonClient OnStoped(Action<TcpJsonClient> callback)
         {

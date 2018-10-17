@@ -20,7 +20,7 @@ namespace Jock.Net.TcpJson
                 using(var writer = new BinaryWriter(ms))
                 {
                     writer.Write(DataType ?? string.Empty);
-                    if (Type == TcpJsonPackageType.NamedStream)
+                    if (Type == TcpJsonPackageType.NamedStream || Type == TcpJsonPackageType.Bytes)
                     {
                         writer.Write(DataBytes.Length);
                         writer.Write(DataBytes, 0, DataBytes.Length);

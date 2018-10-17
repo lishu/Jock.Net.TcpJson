@@ -6,7 +6,7 @@ using System.Threading;
 namespace Jock.Net.TcpJson
 {
     /// <summary>
-    /// 提供一个内部运行线程管理对象
+    /// Provides an internal running thread management object
     /// </summary>
     public abstract class SafeThreadObject
     {
@@ -16,12 +16,12 @@ namespace Jock.Net.TcpJson
         internal SafeThreadObject() { }
 
         /// <summary>
-        /// 内部线程是否正在运行
+        /// Whether the internal thread is running
         /// </summary>
         public bool IsRunning => taskThread?.ThreadState == ThreadState.Running;
 
         /// <summary>
-        /// 启动服务线程
+        /// Start the service thread
         /// </summary>
         public void Start()
         {
@@ -47,7 +47,7 @@ namespace Jock.Net.TcpJson
         }
 
         /// <summary>
-        /// 调用 Stoped 事件
+        /// Calling the <c>Stoped</c> event
         /// </summary>
         protected virtual void OnStop()
         {
@@ -55,23 +55,26 @@ namespace Jock.Net.TcpJson
         }
 
         /// <summary>
-        /// 当内部线程停止时发生
+        /// Triggered when an internal thread is stopped
         /// </summary>
         public event EventHandler Stoped;
 
         /// <summary>
-        /// 当内部线程发生未处理异常时发生
+        /// Occurs when an unhandled exception occurs on an internal thread
         /// </summary>
         public event UnhandledExceptionEventHandler UnhandledException;
 
         /// <summary>
-        /// 内部线程运行代码
+        /// Triggered when an unhandled exception occurs on an internal thread
         /// </summary>
-        /// <param name="token">当用户调用 Stop 方法时触发取消通知</param>
+        /// <param name="token">Triggering a cancellation notification when the user calls the Stop method</param>
         protected abstract void DoRun(CancellationToken token);
 
         /// <summary>
-        /// 通知内部线程停止运行
+        /// Notifies the internal thread to stop running
+        /// <para>
+        /// The internal execution thread must handle the <c>CancellationToken</c> to respond to the stop state.
+        /// </para>
         /// </summary>
         public void Stop()
         {
