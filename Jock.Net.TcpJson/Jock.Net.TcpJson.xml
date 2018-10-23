@@ -78,7 +78,12 @@
         </member>
         <member name="P:Jock.Net.TcpJson.TcpJsonClient.Session">
             <summary>
-            Correlation variable Pool
+            Correlation variable Pool, Hot any value in local <c>TcpJsonClient</c>
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonClient.Cookies">
+            <summary>
+            Cookies what can auto sync between two connected <c>TcpJsonClient</c>
             </summary>
         </member>
         <member name="M:Jock.Net.TcpJson.TcpJsonClient.DoRun(System.Threading.CancellationToken)">
@@ -101,6 +106,26 @@
             <typeparam name="T">Object type</typeparam>
             <param name="obj">Object</param>
             <param name="callback">Post-Send callback</param>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.SendRequest``1(System.String,``0,System.Int32)">
+            <summary>
+            Sync Send an Request and wait Response
+            </summary>
+            <typeparam name="TRequest">Response Object Type</typeparam>
+            <param name="uri">A request uri</param>
+            <param name="obj">Request object</param>
+            <param name="millisecondsTimeout">Response timeout milliseconds, Default is one Minute.</param>
+            <returns>Response object</returns>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.SendRequestAsync``1(System.String,``0,System.Int32)">
+            <summary>
+            Async Send an Request and wait Response
+            </summary>
+            <typeparam name="TRequest">Response Object Type</typeparam>
+            <param name="uri">A request uri</param>
+            <param name="obj">Request object</param>
+            <param name="millisecondsTimeout">Max wait response time</param>
+            <returns>Response object</returns>
         </member>
         <member name="M:Jock.Net.TcpJson.TcpJsonClient.SendBytes(System.Byte[],System.Action)">
             <summary>
@@ -132,6 +157,16 @@
             <param name="callback">callback method</param>
             <returns></returns>
         </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.OnReceiveRequest``2(System.String,System.Func{``0,Jock.Net.TcpJson.TcpJsonClient,``1})">
+            <summary>
+            Register callback response specific type request
+            </summary>
+            <typeparam name="TRequest">The Request type can be handle</typeparam>
+            <typeparam name="TResponse">The response type callback return</typeparam>
+            <param name="uri">A request resorce uri</param>
+            <param name="callback">Invoke when Receive a <c>TRequest</c> request</param>
+            <returns></returns>
+        </member>
         <member name="M:Jock.Net.TcpJson.TcpJsonClient.OnReceiveBytes(System.Action{System.Byte[],Jock.Net.TcpJson.TcpJsonClient})">
             <summary>
             Register callback when a bytes block is received
@@ -144,6 +179,110 @@
             Callback when stopped
             </summary>
             <param name="callback">callback method</param>
+            <returns></returns>
+        </member>
+        <member name="T:Jock.Net.TcpJson.TcpJsonCookies">
+            <summary>
+            Hold a collection of name string cookies, Auto sync between tow connected <c>TcpJsonClient</c>.
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonCookies.Item(System.String)">
+            <summary>
+            Get or set cookie by spec key.
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonCookies.Keys">
+            <summary>
+            Gets a collection containing the keys in the <c>TcpJsonCookies</c>
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonCookies.Values">
+            <summary>
+            Gets a collection containing the values in the <c>TcpJsonCookies</c>
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonCookies.Count">
+            <summary>
+            Gets this number of cookies contained in the <c>TcpJsonCookies</c>
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonCookies.IsReadOnly">
+            <summary>
+            Cookies is read only, allow return <c>false</c>.
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonCookies.Add(System.String,System.String)">
+            <summary>
+            Add a cookie to the cookies.
+            </summary>
+            <param name="key">Cookie name</param>
+            <param name="value">Cookie value</param>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonCookies.Add(System.Collections.Generic.KeyValuePair{System.String,System.String})">
+            <summary>
+            Add a cookie to the cookies
+            </summary>
+            <param name="item">A <c>KeyValuePair&lt;string, string&gt;</c> has Key and Value</param>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonCookies.BeginInit">
+            <summary>
+            Begin a init, This will pause cookie sync.
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonCookies.Clear">
+            <summary>
+            Clear all cookies
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonCookies.Contains(System.Collections.Generic.KeyValuePair{System.String,System.String})">
+            <summary>
+            Determines whether the <c>TcpJsonCookies</c>contains the specified key and equal value.
+            </summary>
+            <param name="item"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonCookies.ContainsKey(System.String)">
+            <summary>
+            Determines whether the <c>TcpJsonCookies</c>contains the specified key.
+            </summary>
+            <param name="key">The key to locate in the <c>TcpJsonCookies</c></param>
+            <returns></returns>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonCookies.CopyTo(System.Collections.Generic.KeyValuePair{System.String,System.String}[],System.Int32)">
+            <summary>
+            Copy all item to array
+            </summary>
+            <param name="array"></param>
+            <param name="arrayIndex"></param>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonCookies.EndInit">
+            <summary>
+            End a init, This will restore cookie sync.
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonCookies.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the <c>TcpJsonCookies</c>
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonCookies.Remove(System.String)">
+            <summary>
+            Removes the value with the specified key from the <c>TcpJsonCookies</c>
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonCookies.Remove(System.Collections.Generic.KeyValuePair{System.String,System.String})">
+            <summary>
+            Removes the value with the specified key from the <c>TcpJsonCookies</c>
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonCookies.TryGetValue(System.String,System.String@)">
+            <summary>
+            Try Get Value with the specified key
+            </summary>
+            <param name="key"></param>
+            <param name="value"></param>
             <returns></returns>
         </member>
         <member name="T:Jock.Net.TcpJson.TcpJsonNamedStream">

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>Jock.Net.TcpJson</PackageId>
-    <Version>1.0.0.3</Version>
+    <Version>1.0.1</Version>
     <Authors>yl_ls</Authors>
     <Company></Company>
     <Description>A Simple Tcp &amp; Json Data Transport Library, base .Net Standard 2.0</Description>

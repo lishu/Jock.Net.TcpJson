@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Jock.Net.TcpJson
 {
@@ -24,6 +25,8 @@ namespace Jock.Net.TcpJson
         private List<JsonCallback> mJsonHandlers = new List<JsonCallback>();
         private List<Action<TcpJsonClient>> mStopHandlers = new List<Action<TcpJsonClient>>();
         private List<TcpJsonNamedStream> mNamedStreams = new List<TcpJsonNamedStream>();
+        private List<TcpJsonRequestContext> mWaitResponseContexts = new List<TcpJsonRequestContext>();
+        private List<ReceiveRequestCallback> mReceiveRequestCallbacks = new List<ReceiveRequestCallback>();
 
         /// <summary>
         /// Connect to the specified service side
@@ -87,9 +90,33 @@ namespace Jock.Net.TcpJson
         public TimeSpan PingTimeSpan { get; set; } = TimeSpan.FromSeconds(5);
 
         /// <summary>
-        /// Correlation variable Pool
+        /// Correlation variable Pool, Hot any value in local <c>TcpJsonClient</c>
         /// </summary>
-        public NameValueCollection Session { get; } = new NameValueCollection();
+        public Dictionary<string, object> Session { get; } = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+        private TcpJsonCookies mCookes;
+
+        /// <summary>
+        /// Cookies what can auto sync between two connected <c>TcpJsonClient</c>
+        /// </summary>
+        public TcpJsonCookies Cookies
+        {
+            get
+            {
+                if(mCookes != null)
+                {
+                    return mCookes;
+                }
+                lock (this)
+                {
+                    if (mCookes == null)
+                    {
+                        mCookes = new TcpJsonCookies(this);
+                    }
+                }
+                return mCookes;
+            }
+        }
 
         /// <summary>
         /// Internal thread Run code
@@ -196,8 +223,82 @@ namespace Jock.Net.TcpJson
                 case TcpJsonPackageType.Bytes:
                     DoReceiveBytes(package);
                     break;
+                case TcpJsonPackageType.Request:
+                    DoReceiveRequest(package);
+                    break;
+                case TcpJsonPackageType.Response:
+                    DoReceiveResponse(package);
+                    break;
+                case TcpJsonPackageType.CookieSync:
+                    Cookies.Sync(package);
+                    break;
                 default:
                     break;
+            }
+        }
+
+        private void DoReceiveResponse(TcpJsonPackage package)
+        {
+            if (package.DataType == "ERROR")
+            {
+                var errorResponse = JsonConvert.DeserializeObject<TcpJsonResponse<string>>(package.Data);
+                var responseCxt = mWaitResponseContexts.FirstOrDefault(r => r.Id == errorResponse.Id);
+                if (responseCxt != null)
+                {
+                    responseCxt.SetError(errorResponse.Object);
+                }
+            }
+            else
+            {
+                var responseType = typeof(TcpJsonResponse<>).MakeGenericType(Type.GetType(package.DataType));
+                var responseBody = JsonConvert.DeserializeObject(package.Data, responseType);
+                var id = (Guid)responseType.GetProperty("Id").GetValue(responseBody);
+                var responseCxt = mWaitResponseContexts.FirstOrDefault(r => r.Id == id);
+                if (responseCxt != null)
+                {
+                    responseCxt.SetResponse(responseType.GetProperty("Object").GetValue(responseBody));
+                }
+            }
+        }
+
+        private void DoReceiveRequest(TcpJsonPackage package)
+        {
+            var requestType = Type.GetType(package.DataType);
+            var dataType = typeof(TcpJsonRequest<>).MakeGenericType(requestType);
+
+            var requestBody = JsonConvert.DeserializeObject(package.Data, dataType) as TcpJsonRequest;
+            var handler = mReceiveRequestCallbacks.FirstOrDefault(c => c.URI.Equals(requestBody.URI, StringComparison.OrdinalIgnoreCase) && (c.RequestType == requestType || c.RequestType.IsAssignableFrom(requestType)));
+
+            var responsePackage = new TcpJsonPackage { Type = TcpJsonPackageType.Response };
+            object responseBody = null;
+            if (handler == null)
+            {
+                responseBody = new TcpJsonResponse<string> { Id = requestBody.Id, Object = "No handle this request" };
+                responsePackage.DataType = "ERROR";
+                return;
+            }
+            try
+            {
+                var response = handler.Callback.DynamicInvoke(requestBody.Object, this);
+                var responseDataType = response != null ? response.GetType() : handler.ResponseType;
+                var responseType = typeof(TcpJsonResponse<>).MakeGenericType(responseDataType);
+
+                var responseData = responseType.GetConstructor(Type.EmptyTypes).Invoke(null);
+                responseType.GetProperty("Id").SetValue(responseData, requestBody.Id);
+                responseType.GetProperty("Object").SetValue(responseData, response);
+
+                responsePackage.DataType = responseDataType.AssemblyQualifiedName;
+                responseBody = responseData;
+            }
+            catch(Exception e)
+            {
+                responseBody = new TcpJsonResponse<string> { Id = requestBody.Id, Object = "Handle Exception - " + e.ToString() };
+                responsePackage.DataType = "ERROR";
+            }
+            finally
+            {
+                responsePackage.Data = JsonConvert.SerializeObject(responseBody);
+                SendPackage(responsePackage);
             }
         }
 
@@ -251,7 +352,7 @@ namespace Jock.Net.TcpJson
             tcpJsonPackage.Callback?.Invoke();
         }
 
-        private void SendPackage(TcpJsonPackage package)
+        internal void SendPackage(TcpJsonPackage package)
         {
             sendPackageQueue.Enqueue(package);
         }
@@ -286,6 +387,64 @@ namespace Jock.Net.TcpJson
                 Data = JsonConvert.SerializeObject(obj),
                 Callback = callback
             });
+        }
+
+        /// <summary>
+        /// Sync Send an Request and wait Response
+        /// </summary>
+        /// <typeparam name="TRequest">Response Object Type</typeparam>
+        /// <param name="uri">A request uri</param>
+        /// <param name="obj">Request object</param>
+        /// <param name="millisecondsTimeout">Response timeout milliseconds, Default is one Minute.</param>
+        /// <returns>Response object</returns>
+        public object SendRequest<TRequest>(string uri, TRequest obj, int millisecondsTimeout = 60000)
+        {
+            var data = new TcpJsonRequest<TRequest>
+            {
+                Id = Guid.NewGuid(),
+                URI = uri,
+                Object = obj
+            };
+            TcpJsonRequestContext cxt = new TcpJsonRequestContext(this, data.Id);
+            SendPackage(new TcpJsonPackage
+            {
+                Type = TcpJsonPackageType.Request,
+                DataType = typeof(TRequest).AssemblyQualifiedName,
+                Data = JsonConvert.SerializeObject(data)
+            });
+            mWaitResponseContexts.Add(cxt);
+            try
+            {
+                if (cxt.WaitHandler.WaitOne(millisecondsTimeout))
+                {
+                    if (cxt.IsError)
+                    {
+                        throw new Exception(cxt.ErrorMessage);
+                    }
+                    return cxt.Response;
+                }
+                else
+                {
+                    throw new TimeoutException("Response is Timeout!");
+                }
+            }
+            finally
+            {
+                mWaitResponseContexts.Remove(cxt);
+            }
+        }
+
+        /// <summary>
+        /// Async Send an Request and wait Response
+        /// </summary>
+        /// <typeparam name="TRequest">Response Object Type</typeparam>
+        /// <param name="uri">A request uri</param>
+        /// <param name="obj">Request object</param>
+        /// <param name="millisecondsTimeout">Max wait response time</param>
+        /// <returns>Response object</returns>
+        public Task<object> SendRequestAsync<TRequest>(string uri, TRequest obj, int millisecondsTimeout)
+        {
+            return Task.Run(() => SendRequest(uri, obj, millisecondsTimeout));
         }
 
         /// <summary>
@@ -355,6 +514,23 @@ namespace Jock.Net.TcpJson
             lock (mJsonHandlers)
             {
                 mJsonHandlers.Add(new JsonCallback { Type = typeof(T), Callback = callback });
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Register callback response specific type request
+        /// </summary>
+        /// <typeparam name="TRequest">The Request type can be handle</typeparam>
+        /// <typeparam name="TResponse">The response type callback return</typeparam>
+        /// <param name="uri">A request resorce uri</param>
+        /// <param name="callback">Invoke when Receive a <c>TRequest</c> request</param>
+        /// <returns></returns>
+        public TcpJsonClient OnReceiveRequest<TRequest, TResponse>(string uri, Func<TRequest, TcpJsonClient, TResponse> callback)
+        {
+            lock (mReceiveRequestCallbacks)
+            {
+                mReceiveRequestCallbacks.Add(new ReceiveRequestCallback(uri, typeof(TRequest), typeof(TResponse), callback));
             }
             return this;
         }

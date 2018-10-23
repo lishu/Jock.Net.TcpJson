@@ -8,8 +8,10 @@ namespace Jock.Net.TcpJson.TestClient
     {
         static void Main(string[] args)
         {
+            Console.Title = "Client";
+
             var running = true;
-            var client = new TcpJsonClient(new System.Net.IPEndPoint(new IPAddress(new byte[] { 10, 0, 0, 2 }), 8013));
+            var client = new TcpJsonClient(new System.Net.IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), 8013));
 
             #region New NamedStream Feature in Release 1.0.0.2
             // a named stream can do more custom action
@@ -38,6 +40,11 @@ namespace Jock.Net.TcpJson.TestClient
 
                 #region New SendBytes Feature in Release 1.0.0.3
                 client.SendBytes(Encoding.UTF8.GetBytes(line));
+                #endregion
+
+                #region New SendRequest Feature in Release 1.0.1
+                var result = client.SendRequest("Time", string.Empty);
+                Console.WriteLine(result);
                 #endregion
             }
         }

@@ -11,6 +11,8 @@ namespace Jock.Net.TcpJson.TestServer
 
         static void Main(string[] args)
         {
+            Console.Title = "Server";
+
             var server = new TcpJsonServer(new System.Net.IPEndPoint(IPAddress.Any, 8013));
             server.Connected += Server_Connected;
             server.Start();
@@ -44,11 +46,14 @@ namespace Jock.Net.TcpJson.TestServer
                     Console.WriteLine($"Client {client.Session["Id"]} say: {str}");
                     client.SendObject(true);
                 })
-                #region New SendBytes Feature in Release 1.0.0.3
-                .OnReceiveBytes((bytes,client) =>
+            #region New SendBytes Feature in Release 1.0.0.3
+                .OnReceiveBytes((bytes, client) =>
                 {
                     Console.WriteLine($"Client {client.Session["Id"]} send bytes: {BitConverter.ToString(bytes)}");
                 })
+            #endregion
+            #region New Request Feature in Release 1.0.1
+                .OnReceiveRequest<string, DateTime>("Time", (request, c) => DateTime.Now)
                 #endregion
                 .OnStoped(client =>
                 {

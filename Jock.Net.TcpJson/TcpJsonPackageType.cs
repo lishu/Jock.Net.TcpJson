@@ -10,6 +10,9 @@ namespace Jock.Net.TcpJson
         Json = 1,
         Ping = 2,
         NamedStream = 3,
-        Bytes = 4
+        Bytes = 4,
+        Request = 5,
+        Response = 6,
+        CookieSync = 7,
     }
 }
