@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 
 namespace Jock.Net.TcpJson
@@ -18,7 +16,12 @@ namespace Jock.Net.TcpJson
         /// <summary>
         /// Whether the internal thread is running
         /// </summary>
-        public bool IsRunning => taskThread?.ThreadState == ThreadState.Running;
+        public bool IsRunning { get; private set; }
+
+        /// <summary>
+        /// Gets a value containing the states of the internal thread.
+        /// </summary>
+        public ThreadState ThreadState => taskThread?.ThreadState ?? ThreadState.Unstarted;
 
         /// <summary>
         /// Start the service thread
@@ -27,6 +30,7 @@ namespace Jock.Net.TcpJson
         {
             taskThread = new Thread(Run);
             taskThread.Start();
+            IsRunning = true;
         }
 
         private void Run()
@@ -42,6 +46,7 @@ namespace Jock.Net.TcpJson
             }
             finally
             {
+                IsRunning = false;
                 OnStop();
             }
         }

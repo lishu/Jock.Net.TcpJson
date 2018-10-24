@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{603B7EE9-CEE5-48B1-B5AE-BFA5D0EC899E}"
 	ProjectSection(SolutionItems) = preProject
 		Changelog.md = Changelog.md
+		nugeticon.png = nugeticon.png
 		README.md = README.md
 	EndProjectSection
 EndProject

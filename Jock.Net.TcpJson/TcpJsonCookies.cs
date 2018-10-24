@@ -2,10 +2,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 
 namespace Jock.Net.TcpJson
 {
@@ -16,7 +14,6 @@ namespace Jock.Net.TcpJson
     {
         private TcpJsonClient mClient;
         private bool mInInitMode;
-        private bool mInSyncMode;
         private Dictionary<string, string> mCookies = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private List<TcpJsonCookieSync> mInitSyncs = new List<TcpJsonCookieSync>();
 
@@ -112,6 +109,13 @@ namespace Jock.Net.TcpJson
         public void Clear()
         {
             Values.Clear();
+            if (mInInitMode)
+            {
+                lock (mInitSyncs)
+                {
+                    mInitSyncs.Clear();
+                }
+            }
             SendSync(new TcpJsonCookieSync
             {
                 Action = TcpJsonCookieSyncAction.Clear
@@ -172,6 +176,17 @@ namespace Jock.Net.TcpJson
         public void EndInit()
         {
             mInInitMode = false;
+            if (mInitSyncs.Any())
+            {
+                lock (mInitSyncs)
+                {
+                    foreach(var sync in mInitSyncs)
+                    {
+                        mClient.SendPackage(new TcpJsonPackage { Type = TcpJsonPackageType.CookieSync, DataType = typeof(TcpJsonCookieSync).AssemblyQualifiedName, Data = JsonConvert.SerializeObject(sync) });
+                    }
+                    mInitSyncs.Clear();
+                }
+            }
         }
 
         /// <summary>

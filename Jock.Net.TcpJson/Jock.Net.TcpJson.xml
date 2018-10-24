@@ -14,6 +14,11 @@
             Whether the internal thread is running
             </summary>
         </member>
+        <member name="P:Jock.Net.TcpJson.SafeThreadObject.ThreadState">
+            <summary>
+            Gets a value containing the states of the internal thread.
+            </summary>
+        </member>
         <member name="M:Jock.Net.TcpJson.SafeThreadObject.Start">
             <summary>
             Start the service thread

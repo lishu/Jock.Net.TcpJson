@@ -10,9 +10,10 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/lishu/Jock.Net.TcpJson</RepositoryUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.0.3</AssemblyVersion>
-    <FileVersion>1.0.0.3</FileVersion>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
     <NeutralLanguage></NeutralLanguage>
+    <PackageIconUrl>https://raw.githubusercontent.com/lishu/Jock.Net.TcpJson/master/nugeticon.png</PackageIconUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
