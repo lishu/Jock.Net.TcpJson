@@ -10,5 +10,7 @@
         Request = 5,
         Response = 6,
         CookieSync = 7,
+
+        Bye = 0x88,
     }
 }

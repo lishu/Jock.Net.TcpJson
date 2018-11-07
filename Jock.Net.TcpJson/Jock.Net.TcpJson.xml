@@ -122,16 +122,6 @@
             <param name="millisecondsTimeout">Response timeout milliseconds, Default is one Minute.</param>
             <returns>Response object</returns>
         </member>
-        <member name="M:Jock.Net.TcpJson.TcpJsonClient.SendRequestAsync``1(System.String,``0,System.Int32)">
-            <summary>
-            Async Send an Request and wait Response
-            </summary>
-            <typeparam name="TRequest">Response Object Type</typeparam>
-            <param name="uri">A request uri</param>
-            <param name="obj">Request object</param>
-            <param name="millisecondsTimeout">Max wait response time</param>
-            <returns>Response object</returns>
-        </member>
         <member name="M:Jock.Net.TcpJson.TcpJsonClient.SendBytes(System.Byte[],System.Action)">
             <summary>
             Send a bytes block
@@ -369,6 +359,27 @@
         </member>
         <member name="M:Jock.Net.TcpJson.TcpJsonNamedStream.Write(System.Byte[],System.Int32,System.Int32)">
             <summary>
+            Writes a block of byt </param>
+            <param name="count">
+            The maximum number of bytes to read.
+            </param>
+            <returns>
+            The total number of bytes written into the buffer. This can be less than the
+                number of bytes requested if that number of bytes are not currently available,
+                or zero if the end of the stream is reached before any bytes are read.</returns>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonNamedStream.Seek(System.Int64,System.IO.SeekOrigin)">
+            <summary>
+            Seek access position, Always throw <c>NotSupportedException</c>
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonNamedStream.SetLength(System.Int64)">
+            <summary>
+            Seek stream length, Always throw <c>NotSupportedException</c>
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonNamedStream.Write(System.Byte[],System.Int32,System.Int32)">
+            <summary>
             Writes a block of bytes to the current stream using data read from a buffer.
             </summary>
             <param name="buffer">The buffer to write data from.</param>
@@ -406,7 +417,7 @@
             Triggered when a remote client connection is complete
             </summary>
         </member>
-        <member name="M:Jock.Net.TcpJson.TcpJsonServer.DoRun(System.Threading.CancellationToken)">
+        <member name="M:Jock.Net.TcpJson.TcpJsonServer.DoRun(Jock.Net.TcpJson.CancellationToken)">
             <summary>
             Internal thread Run code
             </summary>

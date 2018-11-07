@@ -6,7 +6,10 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+
+#if !NET35
 using System.Threading.Tasks;
+#endif
 
 namespace Jock.Net.TcpJson
 {
@@ -250,11 +253,11 @@ namespace Jock.Net.TcpJson
             {
                 var responseType = typeof(TcpJsonResponse<>).MakeGenericType(Type.GetType(package.DataType));
                 var responseBody = JsonConvert.DeserializeObject(package.Data, responseType);
-                var id = (Guid)responseType.GetProperty("Id").GetValue(responseBody);
+                var id = (Guid)responseType.GetProperty("Id").GetValue(responseBody, null);
                 var responseCxt = mWaitResponseContexts.FirstOrDefault(r => r.Id == id);
                 if (responseCxt != null)
                 {
-                    responseCxt.SetResponse(responseType.GetProperty("Object").GetValue(responseBody));
+                    responseCxt.SetResponse(responseType.GetProperty("Object").GetValue(responseBody, null));
                 }
             }
         }
@@ -282,8 +285,8 @@ namespace Jock.Net.TcpJson
                 var responseType = typeof(TcpJsonResponse<>).MakeGenericType(responseDataType);
 
                 var responseData = responseType.GetConstructor(Type.EmptyTypes).Invoke(null);
-                responseType.GetProperty("Id").SetValue(responseData, requestBody.Id);
-                responseType.GetProperty("Object").SetValue(responseData, response);
+                responseType.GetProperty("Id").SetValue(responseData, requestBody.Id, null);
+                responseType.GetProperty("Object").SetValue(responseData, response, null);
 
                 responsePackage.DataType = responseDataType.AssemblyQualifiedName;
                 responseBody = responseData;
@@ -432,6 +435,8 @@ namespace Jock.Net.TcpJson
             }
         }
 
+#if NETSTANDARD
+
         /// <summary>
         /// Async Send an Request and wait Response
         /// </summary>
@@ -444,6 +449,7 @@ namespace Jock.Net.TcpJson
         {
             return Task.Run(() => SendRequest(uri, obj, millisecondsTimeout));
         }
+#endif
 
         /// <summary>
         /// Send a bytes block
