@@ -3,15 +3,15 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net35;net40</TargetFrameworks>
     <PackageId>Jock.Net.TcpJson</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>yl_ls</Authors>
     <Company></Company>
     <Description>A Simple Tcp &amp; Json Data Transport Library, base .Net Standard 2.0</Description>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/lishu/Jock.Net.TcpJson</RepositoryUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.2.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
+    <FileVersion>1.0.3.0</FileVersion>
     <NeutralLanguage></NeutralLanguage>
     <PackageIconUrl>https://raw.githubusercontent.com/lishu/Jock.Net.TcpJson/master/nugeticon.png</PackageIconUrl>
   </PropertyGroup>

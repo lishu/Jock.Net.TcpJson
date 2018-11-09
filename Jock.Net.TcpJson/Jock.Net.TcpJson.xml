@@ -4,6 +4,36 @@
         <name>Jock.Net.TcpJson</name>
     </assembly>
     <members>
+        <member name="T:Jock.Net.TcpJson.CancellationToken">
+            <summary>
+            CancellationToken
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.CancellationToken.IsCancellationRequested">
+            <summary>
+            IsCancellationRequested
+            </summary>
+        </member>
+        <member name="T:Jock.Net.TcpJson.CancellationTokenSource">
+            <summary>
+            CancellationToken Source
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.CancellationTokenSource.Token">
+            <summary>
+            CancellationToken
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.CancellationTokenSource.IsCancellationRequested">
+            <summary>
+            IsCancellationRequested
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.CancellationTokenSource.Cancel">
+            <summary>
+            Set source require cancel current async op
+            </summary>
+        </member>
         <member name="T:Jock.Net.TcpJson.SafeThreadObject">
             <summary>
             Provides an internal running thread management object
@@ -39,7 +69,7 @@
             Occurs when an unhandled exception occurs on an internal thread
             </summary>
         </member>
-        <member name="M:Jock.Net.TcpJson.SafeThreadObject.DoRun(System.Threading.CancellationToken)">
+        <member name="M:Jock.Net.TcpJson.SafeThreadObject.DoRun(Jock.Net.TcpJson.CancellationToken)">
             <summary>
             Triggered when an unhandled exception occurs on an internal thread
             </summary>
@@ -108,7 +138,7 @@
             Cookies what can auto sync between two connected <c>TcpJsonClient</c>
             </summary>
         </member>
-        <member name="M:Jock.Net.TcpJson.TcpJsonClient.DoRun(System.Threading.CancellationToken)">
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.DoRun(Jock.Net.TcpJson.CancellationToken)">
             <summary>
             Internal thread Run code
             </summary>
@@ -434,7 +464,7 @@
             Triggered when a remote client connection is complete
             </summary>
         </member>
-        <member name="M:Jock.Net.TcpJson.TcpJsonServer.DoRun(System.Threading.CancellationToken)">
+        <member name="M:Jock.Net.TcpJson.TcpJsonServer.DoRun(Jock.Net.TcpJson.CancellationToken)">
             <summary>
             Internal thread Run code
             </summary>
