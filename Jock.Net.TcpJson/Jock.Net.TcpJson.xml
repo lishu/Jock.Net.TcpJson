@@ -58,11 +58,28 @@
             Json Communication Client
             </summary>
         </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.#ctor">
+            <summary>
+            Create a <c>TcpJsonClient</c> with out <c>IPEndPoint</c>.
+            Must start by `Start(IPEndPoint remoteEP)` method.
+            </summary>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.Start(System.Net.IPEndPoint,Jock.Net.TcpJson.TcpJsonConnectionDeniedEventHandler)">
+            <summary>
+            Start core thread
+            </summary>
+            <param name="remoteEP">the Endpoint you want connect</param>
+            <param name="connectionDeniedEventHandler">a eventhandler invoke if connection denied</param>
+            <exception cref="T:System.ArgumentNullException">remoteEP and connectionDeniedEventHandler can not null</exception>
+            <exception cref="T:System.NotSupportedException"></exception>
+        </member>
         <member name="M:Jock.Net.TcpJson.TcpJsonClient.#ctor(System.Net.IPEndPoint)">
             <summary>
             Connect to the specified service side
             </summary>
             <param name="remoteEP">The service endpoint to connect to</param>
+            <exception cref="T:System.ArgumentNullException"></exception>
+            <exception cref="T:System.Net.Sockets.SocketException"></exception>
         </member>
         <member name="M:Jock.Net.TcpJson.TcpJsonClient.GetNamedStream(System.String)">
             <summary>
@@ -122,16 +139,6 @@
             <param name="millisecondsTimeout">Response timeout milliseconds, Default is one Minute.</param>
             <returns>Response object</returns>
         </member>
-        <member name="M:Jock.Net.TcpJson.TcpJsonClient.SendRequestAsync``1(System.String,``0,System.Int32)">
-            <summary>
-            Async Send an Request and wait Response
-            </summary>
-            <typeparam name="TRequest">Response Object Type</typeparam>
-            <param name="uri">A request uri</param>
-            <param name="obj">Request object</param>
-            <param name="millisecondsTimeout">Max wait response time</param>
-            <returns>Response object</returns>
-        </member>
         <member name="M:Jock.Net.TcpJson.TcpJsonClient.SendBytes(System.Byte[],System.Action)">
             <summary>
             Send a bytes block
@@ -185,6 +192,27 @@
             </summary>
             <param name="callback">callback method</param>
             <returns></returns>
+        </member>
+        <member name="T:Jock.Net.TcpJson.TcpJsonConnectionDeniedEventArgs">
+            <summary>
+            EventArgs for TcpJsonClient connection denied
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonConnectionDeniedEventArgs.Client">
+            <summary>
+            TcpJsonClient instance
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonConnectionDeniedEventArgs.Retry">
+            <summary>
+            set True if want try reconnection
+            </summary>
+        </member>
+        <member name="T:Jock.Net.TcpJson.TcpJsonConnectionDeniedEventHandler">
+            <summary>
+            Delegate for TcpJsonClient connection denied
+            </summary>
+            <param name="e"></param>
         </member>
         <member name="T:Jock.Net.TcpJson.TcpJsonCookies">
             <summary>

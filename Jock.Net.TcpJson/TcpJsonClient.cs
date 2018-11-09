@@ -18,6 +18,8 @@ namespace Jock.Net.TcpJson
     /// </summary>
     public class TcpJsonClient : SafeThreadObject
     {
+        private IPEndPoint remoteEP;
+        private TcpJsonConnectionDeniedEventHandler connectionDeniedEventHandler;
         private Queue<TcpJsonPackage> sendPackageQueue = new Queue<TcpJsonPackage>();
         private MemoryStream readCache = new MemoryStream();
         private DateTime mRemoteActiveTime;
@@ -30,9 +32,38 @@ namespace Jock.Net.TcpJson
         private List<ReceiveRequestCallback> mReceiveRequestCallbacks = new List<ReceiveRequestCallback>();
 
         /// <summary>
+        /// Create a <c>TcpJsonClient</c> with out <c>IPEndPoint</c>.
+        /// Must start by `Start(IPEndPoint remoteEP)` method.
+        /// </summary>
+        public TcpJsonClient()
+        {
+        }
+
+        /// <summary>
+        /// Start core thread
+        /// </summary>
+        /// <param name="remoteEP">the Endpoint you want connect</param>
+        /// <param name="connectionDeniedEventHandler">a eventhandler invoke if connection denied</param>
+        /// <exception cref="ArgumentNullException">remoteEP and connectionDeniedEventHandler can not null</exception>
+        /// <exception cref="NotSupportedException"></exception>
+        public void Start(IPEndPoint remoteEP, TcpJsonConnectionDeniedEventHandler connectionDeniedEventHandler)
+        {
+            if (Client != null)
+            {
+                throw new NotSupportedException("Client has init by Construct method, invoke No parameters `Start()`");
+            }
+            this.remoteEP = remoteEP ?? throw new ArgumentNullException(nameof(remoteEP));
+            this.connectionDeniedEventHandler = connectionDeniedEventHandler ?? throw new ArgumentNullException(nameof(connectionDeniedEventHandler));
+            Client = new TcpClient();
+            Start();
+        }
+
+        /// <summary>
         /// Connect to the specified service side
         /// </summary>
         /// <param name="remoteEP">The service endpoint to connect to</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="SocketException"></exception>
         public TcpJsonClient(IPEndPoint remoteEP)
         {
             Client = new TcpClient();
@@ -83,7 +114,7 @@ namespace Jock.Net.TcpJson
         /// <summary>
         /// The associated <c>TcpClient</c> object
         /// </summary>
-        public TcpClient Client { get; }
+        public TcpClient Client { get; private set; }
 
         /// <summary>
         /// Interval for automatic Ping
@@ -125,6 +156,24 @@ namespace Jock.Net.TcpJson
         /// <param name="token">Triggering a cancellation notification when the user calls the Stop method</param>
         protected override void DoRun(CancellationToken token)
         {
+            if (!Client.Connected && remoteEP != null)
+            {
+                RECONN:
+                try
+                {
+                    Client.Connect(remoteEP);
+                }
+                catch(SocketException)
+                {
+                    var e = new TcpJsonConnectionDeniedEventArgs(this);
+                    connectionDeniedEventHandler(e);
+                    if (e.Retry)
+                    {
+                        goto RECONN;
+                    }
+                    return;
+                }
+            }
             using (var stream = Client.GetStream())
             {
                 while (!token.IsCancellationRequested)
