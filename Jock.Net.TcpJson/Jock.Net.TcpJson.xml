@@ -4,36 +4,6 @@
         <name>Jock.Net.TcpJson</name>
     </assembly>
     <members>
-        <member name="T:Jock.Net.TcpJson.CancellationToken">
-            <summary>
-            CancellationToken
-            </summary>
-        </member>
-        <member name="P:Jock.Net.TcpJson.CancellationToken.IsCancellationRequested">
-            <summary>
-            IsCancellationRequested
-            </summary>
-        </member>
-        <member name="T:Jock.Net.TcpJson.CancellationTokenSource">
-            <summary>
-            CancellationToken Source
-            </summary>
-        </member>
-        <member name="P:Jock.Net.TcpJson.CancellationTokenSource.Token">
-            <summary>
-            CancellationToken
-            </summary>
-        </member>
-        <member name="P:Jock.Net.TcpJson.CancellationTokenSource.IsCancellationRequested">
-            <summary>
-            IsCancellationRequested
-            </summary>
-        </member>
-        <member name="M:Jock.Net.TcpJson.CancellationTokenSource.Cancel">
-            <summary>
-            Set source require cancel current async op
-            </summary>
-        </member>
         <member name="T:Jock.Net.TcpJson.SafeThreadObject">
             <summary>
             Provides an internal running thread management object
@@ -69,7 +39,7 @@
             Occurs when an unhandled exception occurs on an internal thread
             </summary>
         </member>
-        <member name="M:Jock.Net.TcpJson.SafeThreadObject.DoRun(Jock.Net.TcpJson.CancellationToken)">
+        <member name="M:Jock.Net.TcpJson.SafeThreadObject.DoRun(System.Threading.CancellationToken)">
             <summary>
             Triggered when an unhandled exception occurs on an internal thread
             </summary>
@@ -138,7 +108,7 @@
             Cookies what can auto sync between two connected <c>TcpJsonClient</c>
             </summary>
         </member>
-        <member name="M:Jock.Net.TcpJson.TcpJsonClient.DoRun(Jock.Net.TcpJson.CancellationToken)">
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.DoRun(System.Threading.CancellationToken)">
             <summary>
             Internal thread Run code
             </summary>
@@ -167,6 +137,16 @@
             <param name="uri">A request uri</param>
             <param name="obj">Request object</param>
             <param name="millisecondsTimeout">Response timeout milliseconds, Default is one Minute.</param>
+            <returns>Response object</returns>
+        </member>
+        <member name="M:Jock.Net.TcpJson.TcpJsonClient.SendRequestAsync``1(System.String,``0,System.Int32)">
+            <summary>
+            Async Send an Request and wait Response
+            </summary>
+            <typeparam name="TRequest">Response Object Type</typeparam>
+            <param name="uri">A request uri</param>
+            <param name="obj">Request object</param>
+            <param name="millisecondsTimeout">Max wait response time</param>
             <returns>Response object</returns>
         </member>
         <member name="M:Jock.Net.TcpJson.TcpJsonClient.SendBytes(System.Byte[],System.Action)">
@@ -199,14 +179,7 @@
             <param name="callback">callback method</param>
             <returns></returns>
         </member>
-        <member name="M:Jock.Net.TcpJson.TcpJsonClient.OnReceiveRequest``2(System.String,System.Func{``0,Jock.Net.TcpJson.TcpJsonClient,``1})">
-            <summary>
-            Register callback response specific type request
-            </summary>
-            <typeparam name="TRequest">The Request type can be handle</typeparam>
-            <typeparam name="TResponse">The response type callback return</typeparam>
-            <param name="uri">A request resorce uri</param>
-            <param name="callback">Invoke when Receive a <c>TRequest</c> request</param>
+        <membquest</c> request</param>
             <returns></returns>
         </member>
         <member name="M:Jock.Net.TcpJson.TcpJsonClient.OnReceiveBytes(System.Action{System.Byte[],Jock.Net.TcpJson.TcpJsonClient})">
@@ -464,7 +437,7 @@
             Triggered when a remote client connection is complete
             </summary>
         </member>
-        <member name="M:Jock.Net.TcpJson.TcpJsonServer.DoRun(Jock.Net.TcpJson.CancellationToken)">
+        <member name="M:Jock.Net.TcpJson.TcpJsonServer.DoRun(System.Threading.CancellationToken)">
             <summary>
             Internal thread Run code
             </summary>
@@ -487,6 +460,36 @@
             <c>TcpClient</c> object to which the client establishes a connection
             </summary>
         </member>
+        <member name="T:Jock.Net.TcpJson.ConnectedEventHandler">
+            <summary>
+            Provides callbacks when a client completes a connection
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="T:Jock.Net.TcpJson.ConnectedEventArgs">
+            <summary>
+            Callback parameters when the client finishes the connection
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.ConnectedEventArgs.ServerClient">
+            <summary>
+            Client Communication End Object
+            </summary>
+        </member>
+        <member name="T:Jock.Net.TcpJson.TcpJsonServerClient">
+            <summary>
+            The communication side of the Json server
+            </summary>
+        </member>
+        <member name="P:Jock.Net.TcpJson.TcpJsonServerClient.Server">
+            <summary>
+            Get the relevant service side <c>TcpJsonServer</c>
+            </summary>
+        </member>
+    </members>
+</doc>
+
         <member name="T:Jock.Net.TcpJson.ConnectedEventHandler">
             <summary>
             Provides callbacks when a client completes a connection

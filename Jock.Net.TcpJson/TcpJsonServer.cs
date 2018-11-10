@@ -80,9 +80,11 @@ namespace Jock.Net.TcpJson
             var serverClient = new TcpJsonServerClient(this, tcpClient);
             serverClient.Stoped += ServerClient_Stoped;
             mClients.Add(serverClient);
+
+            serverClient.Start();
+
             var e = new ConnectedEventArgs(serverClient);
             Connected?.Invoke(this, e);
-            e.ServerClient.Start();
         }
 
         private void ServerClient_Stoped(object sender, EventArgs e)
