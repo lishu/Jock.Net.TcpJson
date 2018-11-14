@@ -26,7 +26,9 @@ namespace Jock.Net.TcpJson.TestClient
             .OnStoped(c=>
             {
                 Console.WriteLine("Connection Lost.");
-                Environment.Exit(-1);
+                //Environment.Exit(-1);
+                System.Threading.Thread.Sleep(2000);
+                c.Start();
             });
             client.Start();
             while (running)

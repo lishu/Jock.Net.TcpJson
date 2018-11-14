@@ -67,7 +67,7 @@ namespace Jock.Net.TcpJson
         public TcpJsonClient(IPEndPoint remoteEP)
         {
             Client = new TcpClient();
-            Client.Connect(remoteEP);
+            Client.Connect(this.remoteEP = remoteEP);
             this.mRemoteActiveTime = DateTime.Now;
         }
 
@@ -162,6 +162,11 @@ namespace Jock.Net.TcpJson
                 try
                 {
                     Client.Connect(remoteEP);
+                }
+                catch(ObjectDisposedException)
+                {
+                    Client = new TcpClient();
+                    goto RECONN;
                 }
                 catch(SocketException)
                 {
